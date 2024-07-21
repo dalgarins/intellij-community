@@ -37,6 +37,7 @@ class JUnitRunConfigurationProperties(
         "class" -> listOf(options.get("MAIN_CLASS_NAME")!!)
         "package" -> listOf("${options.get("PACKAGE_NAME")!!}.*")
         "pattern" -> configuration.getChild("patterns")!!.children("pattern").map { it.getAttributeValue("testClass")!! }.toList()
+        //"tags" -> configuration.getChild("tag")?.getAttributeValue("value")?.split(",")
         else -> throw RuntimeException("Cannot run ${file.name} configuration: '$testKind' test kind is not supported")
       }
 

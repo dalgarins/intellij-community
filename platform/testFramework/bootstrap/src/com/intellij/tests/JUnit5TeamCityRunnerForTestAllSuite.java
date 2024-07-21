@@ -66,6 +66,7 @@ public final class JUnit5TeamCityRunnerForTestAllSuite {
         // Add filter
         filters.add(createPerformancePostDiscoveryFilter(classLoader));
       }
+      filters.add(TagFilter.includeTags());
       LauncherDiscoveryRequest discoveryRequest = LauncherDiscoveryRequestBuilder.request()
         .selectors(selectors)
         .filters(filters.toArray(new Filter[0]))
