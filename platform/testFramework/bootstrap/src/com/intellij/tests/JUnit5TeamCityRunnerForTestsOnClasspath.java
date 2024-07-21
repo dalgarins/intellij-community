@@ -63,8 +63,7 @@ public final class JUnit5TeamCityRunnerForTestsOnClasspath {
       LauncherDiscoveryRequest discoveryRequest = LauncherDiscoveryRequestBuilder.request()
         .configurationParameter("junit.jupiter.extensions.autodetection.enabled", "true")
         .selectors(selectors)
-        .filters(nameFilter, postDiscoveryFilter, EngineFilter.excludeEngines(VintageTestDescriptor.ENGINE_ID), TagFilter.includeTags())
-        .build();
+        .filters(nameFilter, postDiscoveryFilter, EngineFilter.excludeEngines(VintageTestDescriptor.ENGINE_ID)).build();
       TestPlan testPlan = launcher.discover(discoveryRequest);
       if (testPlan.containsTests()) {
         if (ourCollectTestsFile != null) {
