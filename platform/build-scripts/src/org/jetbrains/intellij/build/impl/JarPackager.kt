@@ -32,7 +32,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.PathMatcher
 import java.util.*
+import kotlin.io.path.extension
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.name
 
 private val JAR_NAME_WITH_VERSION_PATTERN = "(.*)-\\d+(?:\\.\\d+)*\\.jar*".toPattern()
 
@@ -874,19 +876,25 @@ private class NativeFileHandlerImpl(private val context: BuildContext, private v
     }
 
     val data = dataSupplier()
+    val fileName = Path.of(name)
     return ByteBufferChannel(data).use { byteBufferChannel ->
       when (byteBufferChannel.detectFileType()) {
         FileType.MachO -> {
           if (isMacBinarySigned(byteBufferChannel, name) || !context.isMacCodeSignEnabled) {
             return null
           }
-          signData(data, context)
+          val signed = signData(data, fileName.name, context, macSigningOptions("application/x-mac-app-bin", context))
+          check(isMacBinarySigned(signed)) { "Missing signature for $signed" }
+          signed
         }
         FileType.Pe -> {
-          if (!isWindowsSigned(byteBufferChannel, name)) {
-            context.messages.warning("Windows binary $name is not signed")
+          if (isWindowsSigned(byteBufferChannel, name) || !context.isWindowsCodeSignEnabled) {
+            return null
           }
-          return null
+          val contentType = if (fileName.extension == "exe") "application/x-exe" else "application/x-dll"
+          val signed = signData(data, fileName.name, context, BuildOptions.WIN_SIGN_OPTIONS.put("contentType", contentType))
+          check(isWindowsBinarySigned(signed)) { "Missing signature for $signed" }
+          signed
         }
         else -> null
       }
