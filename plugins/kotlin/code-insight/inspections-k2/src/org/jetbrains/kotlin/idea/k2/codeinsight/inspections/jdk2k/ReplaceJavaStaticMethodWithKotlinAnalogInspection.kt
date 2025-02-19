@@ -54,18 +54,20 @@ internal class ReplaceJavaStaticMethodWithKotlinAnalogInspection :
         }.takeIf { it.isNotEmpty() }
     }
 
-    override fun InspectionManager.createProblemDescriptor(
+    override fun InspectionManager.createProblemDescriptors(
         element: KtCallExpression,
         context: List<Replacement>,
         rangeInElement: TextRange?,
         onTheFly: Boolean,
-    ): ProblemDescriptor = createProblemDescriptor(
-        /* psiElement = */ element,
-        /* rangeInElement = */ rangeInElement,
-        /* descriptionTemplate = */ KotlinBundle.message("should.be.replaced.with.kotlin.function"),
-        /* highlightType = */ ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
-        /* onTheFly = */ onTheFly,
-        /* ...fixes = */ *(context.map { it.asQuickFix() }.toArray(LocalQuickFix.EMPTY_ARRAY)),
+    ): List<ProblemDescriptor> = listOf(
+        createProblemDescriptor(
+            /* psiElement = */ element,
+            /* rangeInElement = */ rangeInElement,
+            /* descriptionTemplate = */ KotlinBundle.message("should.be.replaced.with.kotlin.function"),
+            /* highlightType = */ ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
+            /* onTheFly = */ onTheFly,
+            /* ...fixes = */ *(context.map { it.asQuickFix() }.toArray(LocalQuickFix.EMPTY_ARRAY)),
+        )
     )
 
     private fun Replacement.asQuickFix() = object : KotlinModCommandQuickFix<KtCallExpression>() {

@@ -26,18 +26,20 @@ internal class VariableNeverReadInspection : KotlinApplicableInspectionBase<KtNa
 
     override fun getApplicableRanges(element: KtNamedDeclaration): List<TextRange> = ApplicabilityRanges.declarationName(element)
 
-    override fun InspectionManager.createProblemDescriptor(
+    override fun InspectionManager.createProblemDescriptors(
         element: KtNamedDeclaration,
         context: Unit,
         rangeInElement: TextRange?,
         onTheFly: Boolean
-    ): ProblemDescriptor = createProblemDescriptor(
-        /* psiElement = */ element,
-        /* rangeInElement = */ rangeInElement,
-        /* descriptionTemplate = */ KotlinBundle.message("variable.is.never.read", element.name.toString()),
-        /* highlightType = */ ProblemHighlightType.LIKE_UNUSED_SYMBOL,
-        /* onTheFly = */ false,
-        /* ...fixes = */ *LocalQuickFix.EMPTY_ARRAY // TODO KTIJ-33011
+    ): List<ProblemDescriptor> = listOf(
+        createProblemDescriptor(
+            /* psiElement = */ element,
+            /* rangeInElement = */ rangeInElement,
+            /* descriptionTemplate = */ KotlinBundle.message("variable.is.never.read", element.name.toString()),
+            /* highlightType = */ ProblemHighlightType.LIKE_UNUSED_SYMBOL,
+            /* onTheFly = */ false,
+            /* ...fixes = */ *LocalQuickFix.EMPTY_ARRAY // TODO KTIJ-33011
+        )
     )
 
     override fun buildVisitor(

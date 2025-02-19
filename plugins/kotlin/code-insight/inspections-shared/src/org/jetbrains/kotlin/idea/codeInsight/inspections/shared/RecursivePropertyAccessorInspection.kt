@@ -45,23 +45,17 @@ class RecursivePropertyAccessorInspection : KotlinApplicableInspectionBase<KtSim
         }
     }
 
-    override fun InspectionManager.createProblemDescriptor(
+    override fun InspectionManager.createProblemDescriptors(
         element: KtSimpleNameExpression, context: Context, rangeInElement: TextRange?, onTheFly: Boolean
-    ): ProblemDescriptor = createQuickFix(element)?.let {
+    ): List<ProblemDescriptor> = listOf(
         createProblemDescriptor(
             /* psiElement = */ element,
             /* rangeInElement = */ rangeInElement,
             /* descriptionTemplate = */ getProblemDescription(context),
             /* highlightType = */ ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
             /* onTheFly = */ onTheFly,
-            /* ...fixes = */ it,
+            /* ...fixes = */ *listOfNotNull(createQuickFix(element)).toTypedArray()
         )
-    } ?: createProblemDescriptor(
-        /* psiElement = */ element,
-        /* rangeInElement = */ rangeInElement,
-        /* descriptionTemplate = */ getProblemDescription(context),
-        /* highlightType = */ ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
-        /* onTheFly = */ onTheFly,
     )
 
     override fun buildVisitor(

@@ -39,13 +39,13 @@ internal class NestedLambdaShadowedImplicitParameterInspection :
         return KotlinBundle.message("implicit.parameter.it.of.enclosing.lambda.is.shadowed")
     }
 
-    override fun InspectionManager.createProblemDescriptor(
+    override fun InspectionManager.createProblemDescriptors(
         element: KtNameReferenceExpression,
         context: Context,
         rangeInElement: TextRange?,
         onTheFly: Boolean
-    ): ProblemDescriptor {
-        return createProblemDescriptor(
+    ): List<ProblemDescriptor> = listOf(
+        createProblemDescriptor(
             /* psiElement = */ element,
             /* rangeInElement = */ rangeInElement,
             /* descriptionTemplate = */ getProblemDescription(),
@@ -61,7 +61,7 @@ internal class NestedLambdaShadowedImplicitParameterInspection :
                 KotlinBundle.message("add.explicit.parameter.to.outer.lambda.fix.text"),
             ),
         )
-    }
+    )
 
     override fun buildVisitor(
         holder: ProblemsHolder,

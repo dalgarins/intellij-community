@@ -35,18 +35,20 @@ import org.jetbrains.kotlin.psi.*
 internal class ForEachParameterNotUsedInspection :
     KotlinApplicableInspectionBase<KtCallExpression, UnusedForEachParameterInfo>() {
 
-    override fun InspectionManager.createProblemDescriptor(
+    override fun InspectionManager.createProblemDescriptors(
         element: KtCallExpression,
         context: UnusedForEachParameterInfo,
         rangeInElement: TextRange?,
         onTheFly: Boolean
-    ): ProblemDescriptor = createProblemDescriptor(
-        /* psiElement = */ element,
-        /* rangeInElement = */ rangeInElement,
-        /* descriptionTemplate = */ KotlinBundle.message("loop.parameter.0.is.unused", context.paramName),
-        /* highlightType = */ ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
-        /* onTheFly = */ onTheFly,
-        /* ...fixes = */ *createQuickFixes(element, context).toTypedArray()
+    ): List<ProblemDescriptor> = listOf(
+        createProblemDescriptor(
+            /* psiElement = */ element,
+            /* rangeInElement = */ rangeInElement,
+            /* descriptionTemplate = */ KotlinBundle.message("loop.parameter.0.is.unused", context.paramName),
+            /* highlightType = */ ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
+            /* onTheFly = */ onTheFly,
+            /* ...fixes = */ *createQuickFixes(element, context).toTypedArray()
+        )
     )
 
     private fun createQuickFixes(

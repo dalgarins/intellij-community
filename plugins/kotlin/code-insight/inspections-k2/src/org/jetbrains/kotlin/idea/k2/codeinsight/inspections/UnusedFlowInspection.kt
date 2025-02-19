@@ -25,17 +25,19 @@ import org.jetbrains.kotlin.psi.psiUtil.parents
 private val FLOW_CLASS_ID = ClassId.fromString("kotlinx/coroutines/flow/Flow")
 
 internal class UnusedFlowInspection : KotlinApplicableInspectionBase<KtExpression, Unit>() {
-    override fun InspectionManager.createProblemDescriptor(
+    override fun InspectionManager.createProblemDescriptors(
         element: KtExpression,
         context: Unit,
         rangeInElement: TextRange?,
         onTheFly: Boolean
-    ): ProblemDescriptor = createProblemDescriptor(
-        element,
-        rangeInElement,
-        KotlinBundle.message("flow.constructed.but.not.used"),
-        ProblemHighlightType.WARNING,
-        onTheFly
+    ): List<ProblemDescriptor> = listOf(
+        createProblemDescriptor(
+            element,
+            rangeInElement,
+            KotlinBundle.message("flow.constructed.but.not.used"),
+            ProblemHighlightType.WARNING,
+            onTheFly
+        )
     )
 
     override fun buildVisitor(

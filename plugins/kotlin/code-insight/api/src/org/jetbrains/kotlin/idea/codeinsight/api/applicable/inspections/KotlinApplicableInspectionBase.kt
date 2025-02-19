@@ -18,12 +18,12 @@ abstract class KotlinApplicableInspectionBase<E : KtElement, C : Any> : LocalIns
                                                                         ApplicableRangesProvider<E>,
                                                                         ContextProvider<E, C> {
 
-    protected abstract fun InspectionManager.createProblemDescriptor(
+    protected abstract fun InspectionManager.createProblemDescriptors(
         element: E,
         context: C,
         rangeInElement: TextRange?,
         onTheFly: Boolean,
-    ): ProblemDescriptor
+    ): Iterable<ProblemDescriptor>
 
     protected fun visitTargetElement(
         element: E,
@@ -49,8 +49,8 @@ abstract class KotlinApplicableInspectionBase<E : KtElement, C : Any> : LocalIns
                 .withPsiAttachment("file.kt", element.containingFile)
         } ?: return
         ranges.asSequence()
-            .map { rangeInElement ->
-                holder.manager.createProblemDescriptor(
+            .flatMap { rangeInElement ->
+                holder.manager.createProblemDescriptors(
                     element,
                     context,
                     rangeInElement,
@@ -99,18 +99,20 @@ abstract class KotlinApplicableInspectionBase<E : KtElement, C : Any> : LocalIns
             context: C,
         ): KotlinModCommandQuickFix<E>
 
-        final override fun InspectionManager.createProblemDescriptor(
+        final override fun InspectionManager.createProblemDescriptors(
             element: E,
             context: C,
             rangeInElement: TextRange?,
             onTheFly: Boolean
-        ): ProblemDescriptor = createProblemDescriptor(
-            /* psiElement = */ element,
-            /* rangeInElement = */ rangeInElement,
-            /* descriptionTemplate = */ getProblemDescription(element, context),
-            /* highlightType = */ getProblemHighlightType(element, context),
-            /* onTheFly = */ onTheFly,
-            /* ...fixes = */ createQuickFix(element, context),
+        ): List<ProblemDescriptor> = listOf(
+            createProblemDescriptor(
+                /* psiElement = */ element,
+                /* rangeInElement = */ rangeInElement,
+                /* descriptionTemplate = */ getProblemDescription(element, context),
+                /* highlightType = */ getProblemHighlightType(element, context),
+                /* onTheFly = */ onTheFly,
+                /* ...fixes = */ createQuickFix(element, context),
+            )
         )
     }
 }

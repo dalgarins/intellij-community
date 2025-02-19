@@ -37,18 +37,20 @@ internal class RemoveExplicitTypeArgumentsInspection : KotlinApplicableInspectio
 
     override fun KaSession.prepareContext(element: KtTypeArgumentList): Unit? = areTypeArgumentsRedundant(element).asUnit
 
-    override fun InspectionManager.createProblemDescriptor(
+    override fun InspectionManager.createProblemDescriptors(
         element: KtTypeArgumentList,
         context: Unit,
         rangeInElement: TextRange?,
         onTheFly: Boolean
-    ): ProblemDescriptor = createProblemDescriptor(
-        /* psiElement = */ element,
-        /* rangeInElement = */ rangeInElement,
-        /* descriptionTemplate = */ KotlinBundle.message("explicit.type.arguments.can.be.inferred"),
-        /* highlightType = */ ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
-        /* onTheFly = */ onTheFly,
-        /* ...fixes = */ *createQuickFixes(element).toTypedArray(),
+    ): List<ProblemDescriptor> = listOf(
+        createProblemDescriptor(
+            /* psiElement = */ element,
+            /* rangeInElement = */ rangeInElement,
+            /* descriptionTemplate = */ KotlinBundle.message("explicit.type.arguments.can.be.inferred"),
+            /* highlightType = */ ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
+            /* onTheFly = */ onTheFly,
+            /* ...fixes = */ *createQuickFixes(element).toTypedArray(),
+        )
     )
 
     private fun createQuickFixes(
