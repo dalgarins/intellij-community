@@ -11,8 +11,9 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.TextLayoutResult
-import java.util.*
+import java.util.TreeMap
 import org.jetbrains.jewel.foundation.ExperimentalJewelApi
+import org.jetbrains.jewel.foundation.GenerateDataFunctions
 import org.jetbrains.jewel.foundation.util.myLogger
 import org.jetbrains.jewel.markdown.MarkdownBlock
 import org.jetbrains.jewel.markdown.WithChildrenMarkdown
@@ -128,8 +129,16 @@ public abstract class ScrollingSynchronizer {
             }
     }
 
-    public data class LocatableMarkdownBlock(public val originalBlock: MarkdownBlock, public val lines: IntRange) :
-        MarkdownBlock.CustomBlock
+    @GenerateDataFunctions
+    public class LocatableMarkdownBlock(public val originalBlock: MarkdownBlock, public val lines: IntRange) :
+        MarkdownBlock.CustomBlock {
+        override fun equals(other: Any?): Boolean =
+            other is LocatableMarkdownBlock && originalBlock == other.originalBlock && lines == other.lines
+
+        override fun hashCode(): Int = originalBlock.hashCode() * 31 + lines.hashCode() * 31
+
+        override fun toString(): String = "LocatableMarkdownBlock(originalBlock=$originalBlock, lines=$lines)"
+    }
 
     private class PerLine(private val scrollState: ScrollState) : ScrollingSynchronizer() {
         private val lines2Blocks = TreeMap<Int, MarkdownBlock>()
@@ -226,13 +235,18 @@ public abstract class ScrollingSynchronizer {
         // same time
         // (or, at least, its contents always take a fixed number of lines)
         private fun MarkdownBlock.originallyEquals(other: MarkdownBlock): Boolean {
-            if (this is LocatableMarkdownBlock && other is LocatableMarkdownBlock) {
-                if (lines.endInclusive - lines.start != other.lines.endInclusive - other.lines.start) return false
+            if (
+                this is LocatableMarkdownBlock &&
+                    other is LocatableMarkdownBlock &&
+                    lines.endInclusive - lines.start != other.lines.endInclusive - other.lines.start
+            ) {
+                return false
             }
             val originalBlock = (this as? LocatableMarkdownBlock)?.originalBlock ?: this
             val otherOriginalBlock = (other as? LocatableMarkdownBlock)?.originalBlock ?: other
-            if (originalBlock !is WithChildrenMarkdown || otherOriginalBlock !is WithChildrenMarkdown)
+            if (originalBlock !is WithChildrenMarkdown || otherOriginalBlock !is WithChildrenMarkdown) {
                 return originalBlock == otherOriginalBlock
+            }
 
             if (originalBlock.children.size != otherOriginalBlock.children.size) return false
             return originalBlock.children.zip(otherOriginalBlock.children).all { (a, b) -> a.originallyEquals(b) }

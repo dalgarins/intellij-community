@@ -6,7 +6,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.takeOrElse
@@ -36,7 +44,6 @@ public open class ScrollSyncMarkdownBlockRenderer(
     renderingExtensions: List<MarkdownRendererExtension>,
     inlineRenderer: InlineMarkdownRenderer,
 ) : DefaultMarkdownBlockRenderer(rootStyling, renderingExtensions, inlineRenderer) {
-
     @Composable
     override fun render(block: MarkdownBlock, enabled: Boolean, onUrlClick: (String) -> Unit, onTextClick: () -> Unit) {
         if (block is ScrollingSynchronizer.LocatableMarkdownBlock) {
@@ -44,7 +51,7 @@ public open class ScrollSyncMarkdownBlockRenderer(
             // but using the wrapper in overloaded functions here to pass to AutoScrollableBlock
             val blocks = remember { mutableStateOf(block) }
             blocks.value = block
-            CompositionLocalProvider(LocalUniqueBlock provides blocks.value) {
+            CompositionLocalProvider(localUniqueBlock provides blocks.value) {
                 // Don't recompose unchanged blocks
                 // val ogBlock = remember(block) { block.originalBlock }
                 super.render(block.originalBlock, enabled, onUrlClick, onTextClick)
@@ -68,7 +75,7 @@ public open class ScrollSyncMarkdownBlockRenderer(
                     super.render(block, styling, enabled, onUrlClick, onTextClick)
                     return
                 }
-        val uniqueBlock = LocalUniqueBlock.current?.takeIf { it.originalBlock == block } ?: block
+        val uniqueBlock = localUniqueBlock.current?.takeIf { it.originalBlock == block } ?: block
         AutoScrollableBlock(uniqueBlock, synchronizer) {
             super.render(block, styling, enabled, onUrlClick, onTextClick)
         }
@@ -88,7 +95,7 @@ public open class ScrollSyncMarkdownBlockRenderer(
                     super.render(block, styling, enabled, onUrlClick, onTextClick)
                     return
                 }
-        val uniqueBlock = LocalUniqueBlock.current?.takeIf { it.originalBlock == block } ?: block
+        val uniqueBlock = localUniqueBlock.current?.takeIf { it.originalBlock == block } ?: block
         AutoScrollableBlock(uniqueBlock, synchronizer) {
             super.render(block, styling, enabled, onUrlClick, onTextClick)
         }
@@ -106,7 +113,7 @@ public open class ScrollSyncMarkdownBlockRenderer(
         val content = block.content
         val highlightedCode by
             LocalCodeHighlighter.current.highlight(content, block.mimeType).collectAsState(AnnotatedString(content))
-        val uniqueBlock = LocalUniqueBlock.current?.takeIf { it.originalBlock == block } ?: block
+        val uniqueBlock = localUniqueBlock.current?.takeIf { it.originalBlock == block } ?: block
         val actualBlock by rememberUpdatedState(uniqueBlock)
         AutoScrollableBlock(actualBlock, synchronizer) {
             Text(
@@ -134,7 +141,7 @@ public open class ScrollSyncMarkdownBlockRenderer(
                 .border(styling.borderWidth, styling.borderColor, styling.shape)
                 .then(if (styling.fillWidth) Modifier.fillMaxWidth() else Modifier),
         ) {
-            val uniqueBlock = LocalUniqueBlock.current?.takeIf { it.originalBlock == block } ?: block
+            val uniqueBlock = localUniqueBlock.current?.takeIf { it.originalBlock == block } ?: block
             val actualBlock by rememberUpdatedState(uniqueBlock)
             AutoScrollableBlock(actualBlock, scrollingSynchronizer, Modifier.padding(styling.padding)) {
                 Text(
@@ -152,7 +159,7 @@ public open class ScrollSyncMarkdownBlockRenderer(
         }
     }
 
-    private val LocalUniqueBlock: ProvidableCompositionLocal<ScrollingSynchronizer.LocatableMarkdownBlock?> =
+    private val localUniqueBlock: ProvidableCompositionLocal<ScrollingSynchronizer.LocatableMarkdownBlock?> =
         staticCompositionLocalOf {
             null
         }
